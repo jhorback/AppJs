@@ -1,13 +1,14 @@
 ﻿
-var appext = module("appext");
+
+var appjsext = appjs.module("appjsext");
 
 
-appext.register("window", function () {
+appjsext.register("window", function () {
 	return window;
 });
 
 
-appext.service("console", ["window", function (window) {
+appjsext.service("console", ["window", function (window) {
 	var console, log;
 
 	console = window.console || {

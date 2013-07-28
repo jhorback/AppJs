@@ -1,4 +1,4 @@
-﻿var appui = module("appui");
+﻿var appui = appjs.module("appui");
 
 
 appui.service("appurl", ["baseUrl", function (baseUrl) {

@@ -36,7 +36,8 @@
  * Available constructs:
  *     service - a simple call to register.
  */
-var module = (function (context) {
+var appjs = {};
+appjs.module = (function (context) {
 
 	var _ = {
 		modCache: {},
@@ -278,10 +279,13 @@ var module = (function (context) {
 }(context));
 
 
-var app = (function () {
+appjs.app = (function () {
 
 	return function (appName) {
 		return module(appName, true);
 	};
 
 }());
+
+
+appjs.context = context;

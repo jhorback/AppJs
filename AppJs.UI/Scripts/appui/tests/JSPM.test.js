@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../qunit.js" />
-/// <reference path="../../../../harbor.ui/scripts/underscore.js" />
-/// <reference path="../../../../harbor.ui/scripts/jquery-1.9.1.min.js" />
-/// <reference path="../../../../harbor.ui/scripts/app/appjs/JSPM.js" />
+/// <reference path="../../underscore.js" />
+/// <reference path="../../jquery-2.0.3.min.js" />
+/// <reference path="../JSPM.js" />
 
 
-module("JSMP.js");
+QUnit.module("JSMP.js");
 
 window.debug = true;
 
