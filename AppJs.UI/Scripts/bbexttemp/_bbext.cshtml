@@ -1,0 +1,716 @@
+﻿@inherits System.Web.Mvc.WebViewPage
+@using Harbor.UI.Extensions
+		<h1>Application.js</h1>
+		<h2 id="about">About</h2>
+		<p>
+			Application.js is a series of JavaScript modules and mixins that can be used to reduce boilerplate code.
+			Some of the modules are extensions of Backbone and others may require jQuery, Underscore, or nothing at all.
+		</p>
+		
+		
+
+
+		
+
+		
+
+		<h2 id="application">Application</h2>
+		<p>
+			The Application provides an entry point to a JavaScript application.
+			In it's simplest form an application is created (with or without options) and started using the <code>start</code> method.
+		</p>
+		<pre class="prettyprint">
+var someapp = new Application({ /* ... */ });
+// elsewhere
+someapp.start();
+</pre>
+		<p>
+			Other Application features that can be taken advantage of are <strong>routing</strong>, <strong>regions</strong>, 
+			<strong>view management</strong>, and <strong>event aggregation</strong>.
+		</p>
+
+		<h3 id="application-start">start</h3>
+		<code>app.start()</code>
+		<p>
+			Overriding the start method allows you to add initialization code to your app. Arguments are optional, however,
+			the first argument passed to the start method will be added to an <code>options</code> property on the application
+			after being merged into any default options already present on the Application.
+		</p>
+		<pre class="prettyprint linenums">
+var someapp = new Application({
+	start: function (options, hasSecondArgument) {
+		// hasSecondArgument: true
+	},
+
+	someMethod: function () {
+		var data = this.options.data;
+	}
+});
+someapp.start({data:[], true});
+</pre>
+		<p>
+			If setting up Backbone routes, calling the <code>start</code> method will call start on Backbone.history as well.
+			If the start method returns a deferred, the call to start will wait until the deferred is resolved.
+		</p>
+		<p>
+			The start method is also called by <code>IOC</code> so dependencies can be injected for you.
+		</p>
+		<pre class="prettyprint">
+IOC.register("userRepository", SomeUserRepository);
+var someApp = new Application({
+	start: function (options, userRepository) {
+		this.userRepository = userRepository;
+	}
+});
+someApp.start({/*options*/});
+</pre>
+
+
+		<h3 id="application-regions">regions</h3>
+		<code>app.regions</code>
+		<p>
+			The regions property is a hash of region name and region (dom) selector.
+			Regions are setup during application creation so they can be referenced easily during the lifetime of the application.
+		</p>
+		<pre class="prettyprint">
+var someapp = new Application({
+	regions: {
+		"edit", "#edit-region"
+	}
+});
+someapp.regions.edit.show(new SomeView());
+		</pre>
+
+
+		<h3 id="application-root">root</h3>
+		<code>app.root</code>
+		<p>
+			Defining a root property on an application is passed to Backbone.history for url navigation.
+			The property can also be a function that returns the root.
+			The root will be parsed using the Application.url method.
+		</p>
+		<pre class="prettyprint">
+window.baseUrl = "/";
+var MyApp = new Application({
+	root: "user/admin"
+});
+//=> The root passed to Backbone.history will be "/user/admin"
+</pre>
+
+
+		<h3 id="application-routes">routes</h3>
+		<code>app.routes</code>
+		<p>
+			The routes property comes from the Backbone.Router. In addition to the Backbone functionality,
+			the application controller can provide lifetime managmement for views. A method called by a route
+			can return a 'view' which will be rendered in the default region. The method can also return
+			an object containing the view, region, and navigation instructions for history.
+		</p>
+		<pre class="prettyprint linenums">
+var app = new Application({			
+	routes: {
+		"": "main",
+		"edit/:id": "editItem",
+		"*defaultRoute": "main"
+	},
+
+	regions: {
+		"default": "#some-container",
+		"edit": "#edit-container"				
+	},
+	
+	main: function () {
+		return new MainView();
+	},
+
+	editItem: function (id) {
+		var view = new SomeEditView();						
+		return {
+			view: view,
+			region: "edit"
+			navigate: "edit/" + id
+		};
+	}
+});
+</pre>
+		
+
+		<h3 id="application-events">events</h3>
+		<code>app.events.on(event, callback, [context])</code>
+		<p>
+			All applications share the same event bus (using Backbone.Events).
+		</p>
+		<p>
+			A common way of naming events are <code>"object:event"</code>.
+		</p>
+		<pre class="prettyprint">
+someapp.trigger("user:deleted", someData);
+
+// elsewhere
+someotherapp.on("user:deleted", function (someData) {
+	// respond to the user deleted event is some other application
+});
+</pre>
+
+		<h3 id="application-handleLinkClick">handleLinkClick</h3>
+		<code>app.handleLinkClick(event)</code>
+		<p>
+			Call this method when links are clicked to have the router (controller/application) navigate to the url.
+		</p>
+		<pre class="prettyprint">
+// in a Backbone view
+	...
+	events: {
+		"click a": app.handleLinkClick
+	}
+	...
+</pre>
+
+		<h3 id="application-url">Application.url</h3>
+		<code>Application.url(url)</code>
+		<p>
+			Used to parse base urls. This method relies upon a global <code>baseUrl</code> property being set, 
+			otherwise, the url passed will be returned unchanged.
+		</p>
+		<pre class="prettyprint">
+window.baseUrl = "/myapp/";
+var someUrl = Application.url("path/to/file.html");
+=> /myapp/path/to/file.html
+</pre>
+		
+		
+		
+
+		<h2 id="ioc">IOC</h2>
+		<p>
+			IOC is an inversion of control container.
+		</p>
+		<pre class="prettyprint">
+SomeUserRepository = function (userData, events) {
+	this.userData = userData;
+	this.events = events;
+};
+SomeUserRepository.prototype = {
+	// ... define methods
+};
+
+IOC.register({
+	"userRepository": SomeUserRepository,
+	"userData": someUserData,
+	"events": someEventBus
+});
+
+var ur = IOC.get("userRepository");
+</pre>
+		
+		<h3 id="ioc-register">register</h3>
+		<code>register(name, value)</code>
+		<code>register(registration)</code>
+		<p>
+			Registers an object with the container.
+			The value can be any object or a 'newable' prototype.
+			Plain functions cannot be used a dependencies.
+		</p>
+		<p>
+			Registering multiple dependencies at the same time is possible
+			by passing a registration object where the keys are the names
+			and the values are the dependencies.
+		</p>
+
+		<h3 id="ico-get">get</h3>
+		<code>get(name)</code>
+		<p>
+			Retrieves the dependency.
+			If a prototype, will satisfy all dependencies of the constructor.
+		</p>
+ 
+		<h3 id="ioc-call">call</h3>
+		<code>call(method, args, context)</code>
+		<p>
+			A utility method for satisfying the dependencies of a method directly.
+			The args and context are optional.
+			If args are supplied, they will take place of the dependencies.
+			The context will be applied to the method call <code>method.apply(context, dependencies)</code>.
+		</p>
+		<pre class="prettyprint">
+IOC.register("arg2", {/*some dependency*/});
+var myMethod = function (arg1, arg2, arg3) {
+	//...
+};
+IOC.call(myMethod, [arg1, , arg3]);
+</pre>
+		<p>
+			In this case, only arg2 will be injected even if arg1 and/or arg3
+			are registered since they are supplied as arguments.
+		</p>
+		
+		<h2 id="region">Region</h2>
+		<p>
+			A simple abstraction of a dom node.
+			Regions are created on applications using <code>Region.createRegions(application)</code>.
+			They can be used standalone or extend other objects as needed. The view parameters are assumed to be backbone views.
+		</p>
+		<p>
+			Mostly, the <code>render(view)</code> will be called.
+			However, many times other methods such as showEl and hideEl come in handy.
+		</p>
+
+		<h3 id="region-getEl">getEl</h3>
+		<code>
+			var el = appX.regions.regionY.getel();
+		</code>
+		<p>
+			Returns the jQuery wrapped dom node. If 
+		</p>
+		
+		<h3 id="region-render">render</h3>
+		<code>
+			appX.regions.regionY.render(viewZ);
+		</code>
+		<p>
+			Calls render on the view and then calls show.
+		</p>
+		
+		<h3 id="region-show">show</h3>
+		<code>
+			appX.regions.regionY.show(viewZ);
+		</code>
+		<p>
+			Calls open and then sets the html of the region to the view.el.
+		</p>
+		
+		<h3 id="region-showEl">showEl</h3>
+		<p>
+			Calls <code>show()</code> on the el.
+		</p>
+		
+		<h3 id="region-hideEl">hideEl</h3>
+		<p>
+			Calls <code>hide()</code> on the el.
+		</p>
+		
+		<h3 id="region-open">open</h3>
+		<p>
+			Calls close first (to close any previously open views or els.
+			Then sets the internal view property (ready to be shown).
+		</p>
+		
+		<h3 id="region-close">close</h3>
+		<p>
+			Attempts to call the following methods in order:
+		</p>
+		<ol>
+			<li>view.trigger("dispose"); - for eventing.</li>
+			<li>view.unbind(); - for Backbone.</li>
+			<li>view.stopListening(); - for Backbone.</li>
+			<li>view.onClose(); - for cleanup of a destroy method is present.</li>
+			<li>view.destroy(); - alias for onClose.</li>
+		</ol>
+		
+		
+		
+		
+
+		<h2 id="ajaxrequest">AjaxRequest</h2>
+		<code>AjaxRequest(options, handler);</code>
+		Creates an ajax request with deferred execution and provides a handler for http status codes for web apis.
+		<pre class="prettyprint">
+var someReuqest = AjaxRequest(ajaxOptions, {
+	success: fn,	 // 200
+	clientError: fn, // 401
+	401: fn,         // same as clientError above
+	405: fn,
+	// ... any http status code
+}); 
+// elsewhere
+someRequest.execute(data);
+</pre>
+
+		<h3 id="ajaxrequest-handle">handle</h3>
+		<code>someRequest.handle(handler);</code>
+		<p>
+			Extends the handler in the ajax request.
+		</p>
+		<h3 id="ajaxrequest-execute">execute</h3>
+		<code>someRequest.execute(data, handler);</code>
+		<p>
+			Executes the the ajax request using the data and optional handler extension.
+		</p>
+		<h3 id="ajaxrequest-handle-static">AjaxRepuest.handle</h3>
+		<code>AjaxRequest.handle(deferred, handler, proxy);</code>
+		<p>
+			A static version to handle deferreds.
+		</p>
+		<h3 id="ajaxrequest-defaultHandler">AjaxRequest.defaultHandler</h3>
+		<p>
+			There is a basic default handler that can be overridden or extended as needed.
+		</p>
+		<pre class="prettyprint">
+AjaxHandler.defaultHandler.extend({
+	404: fn,
+	500: fn
+});
+</pre>
+		
+		
+		<h2 id="jspm">JSPM</h2>
+		<p>
+			The client portion of a JavaScript package manager for loading JavaScript packages containing scripts, css, and/or templates.
+		</p>
+
+		<h3 id="jspm-pkgSrc">JSPM.pkgSrc</h3>
+		<code>JSPM.pkgSrc</code>
+		<p>
+			Set this to the root url of the package manager.
+			The server should respond with the package manafest.
+		</p>
+		<pre class="prettyprint">
+JSPM.pkgSrc = "/jspm";
+// elsewhere
+JSPM.install("somePackage");
+// request => "/jspm/somepackage"
+// response =>
+{
+	name: "somePackage",
+	scripts: [],		// script urls to load
+	styles: [],			// style sheet urls to load
+	templates: [],		// html templates to load
+	dependencies: []	// other packages that should be loaded first.
+}
+</pre>
+
+		<h3 id="jspm-install">JSPM.install</h3>
+		<code>JSPM.install(pkgs, success, proxy)</code>
+		<p>
+			Installs one or more JavaScript packages.
+			<code>pkgs</code> can be a string or an array.
+			Returns a promise.
+		</p>
+		
+		<h3 id="jspm-register">JSPM.register</h3>
+		<code>JSPM.register(packageName);</code>
+		<pre>
+Explicitly tells the package manager that the package is loaded. Useful when pre-loading packages.
+</pre>
+
+
+		<h2 id="model">Model</h2>
+		<p>
+			Application.js provides a series of Backbone model extensions.
+			Each can be used individually or all can be used by extending the Application.Model object.
+		</p>
+		<code>Application.Model.extend(properties, classProperties);</code>
+		<p>
+			The get, set, bind, and validate methods can be defined for each model property.
+		</p>
+		<pre class="prettyprint">
+var SomeModel = Application.Model.extend({
+	defaults: {
+		firstName: null,
+		lastName: null,
+		fullName: null
+	},
+	fullName: {
+		get: function (currentValue) {
+			return this.get("firstName") + " " + this.get("lastName");
+		},
+		set: function (value) {
+			var parts = value.split(" ");
+			this.set("firstName", parts[0]);
+			this.set("lastName", parts[1]);
+		},
+		bind: ["firstName", "lastName"],
+		validate: { required: true }
+	}  
+});
+</pre>
+
+		<h3 id="model-property-get">property:get</h3>
+		<p>
+			Define this function to provide a getter for the property. The function is passed the current property value.
+		</p>
+		<h3 id="model-property-set">property:set</h3>
+		<p>
+			Define this function to provide a setter for the property. This function is passed the value to set.
+		</p>
+		<h3 id="model-property-bind">property:bind</h3>
+		<p>
+			Define the bind property as a string (or array) of property names the property is dependent on.
+			This will trigger a change on the property if any of the 'bind' properties change
+		</p>
+		<h3 id="model-property-validate">property:validate</h3>
+		<p>
+			Set the validate property to an object describing any number of validators (from the validation module).
+		</p>
+		<pre>
+someField: {
+	validate: {
+ 	    required: true,
+ 	    min: 0,
+ 	    max: 10,
+ 	    email: true,
+ 	    custom: function (value) {
+ 	   	    if (value === 1) {
+ 	   		    return "Value cannot be 1.";
+ 	   	    }
+ 	    }
+    }
+}
+</pre>
+		<h3 id="model-refresh">refresh</h3>
+		<code>someModel.refresh();</code>
+		<p>
+			Forces a change on the calculated values.		
+		</p>
+		<h3 id="model-getErrors">getErrors</h3>
+		<p>
+			Retuns an object containing errors by property (or null if there are no errors).
+		</p>
+		<pre>
+var errors = sm.getErrors();
+if (errors) {
+     // handle the errors
+}
+// errors =>
+{
+	"propertyName": ["error messages"]
+}
+</pre>
+		<h3 id="model-store">store</h3>
+		<code>sm.store();</code>
+		<p>
+			Saves the current model state which can be restored using the <code>restore</code> method.
+		</p>
+		<h3 id="model-restore">restore</h3>
+		<code>sm.restore();</code>
+		<p>
+			Restores the model property values back to the last time <code>store</code> was called.
+		</p>
+		
+		
+		
+
+		
+		<h2 id="view">View</h2>
+		<p>
+			Application.js provides a series of Backbone view extensions.
+			Each can be used individually or all can be used by extending the Application.View object.
+		</p>
+		<code>Application.View.extend(properties, classProperties);</code>
+		
+		<p>
+			Views will use <code>IOC</code> to inject any dependencies.
+		</p>
+		<pre class="prettyprint">
+IOC.register("userRepository", SomeUserRepository);
+
+var SomeView = Application.View.extend({
+	constructor: function (options, userRepository) {
+		this.userRepository = userRepository;
+	}
+});
+
+var sv = new SomeView({ model: someModel });
+// this is the same as
+var sv = new SomeView({ model: someModel }, new SomeUserRepository());
+</pre>
+
+		<h3 id="view-template">template</h3>
+		<code>somemodel.template(template, el);</code>
+		<p>
+			Returns the compiled template function and caches it.
+			The <code>template</code> argument is the id of the script block containing the template.
+			The <code>el</code> argument is an optional which will add the result of the template to the dom node
+			when the template function is invoked.
+		</p>
+		<pre class="prettyprint">
+render: function () {
+	this.template("TemplateName", this.el)(this.model);
+	// same as
+	this.el.html(this.template("TemplateName")(this.model));
+}
+</pre>
+		<h3 id="view-renderTemplate">renderTemplate</h3>
+		<code>this.renderTemplate(teplate);</code>
+		<p>
+			Same as the template method but passes <code>this.el</code> to it.
+		</p>
+		<pre class="prettyprint">
+render: function () {
+	this.renderTemplate("TemplateName")(this.model);
+}
+</pre>
+		<h3 id="view-bindModelToView">bindModelToView</h3>
+		<code>bindModelToView(model, view);</code>
+		<p>
+			Creeates a ModelBinder (see the ModelBinder module) using the specified model and view.
+			If the model is not specified, <code>this.model</code> or <code>this.collection</code>
+			will be used.
+			If the view is not specified, <code>this.el</code> will be used.
+		</p>
+		<h3 id="view-bindTemplate">bindTemplate</h3>
+		<code>bindTemplate(template, el, model);</code>
+		<p>
+			Uses the model and view to render the template then creates a ModelBinder using
+			<code>bindModelToView</code>.
+			If the view is not passed <code>this.el</code> will be used.
+			If the model is not passed <code>this.model</code> will be used.
+		</p>
+		<h3 id="view-isModelValid">isModelValid (displayErrors)</h3>
+		<code>isModelValid(model);</code>
+		<p>
+			Returns true if the model is valid, otherwise updates the view with the errors 
+			using the FormErrorHandler module.
+			If the model is not passed <code>this.model</code> will be used.
+		</p>
+		<h3 id="view-close">close</h3>
+		<code>close();</code>
+		<p>
+			Calls the <code>onClose</code> method if exists.
+			Calls <code>undelegateEvents()</code>, <code>off()</code>, and <code>stopListening()</code>.
+		</p>
+		<p>
+			This is an option other than remove that does not
+			remove the view el and calls an optional 'onClose' method when called.
+		</p>
+		<h3 id="view-onClose">onClose</h3>
+		<code>onClose();</code>
+		<p>
+			Define this method to perform any neccessary cleanup with the views <code>close</code> method is called.
+		</p>
+		<h3 id="view-regions">regions</h3>
+		<code>view.regions</code>
+		<p>
+			Uses the Regions object the same way an Application does to allow defining of regionso on a view.
+		</p>
+		<pre class="prettyprint">
+var SomeView = Application.View.extend({
+	regions: {
+		"main": "#main"
+	}
+});
+var sv = new SomeView();
+// inside a method on SomeView (such as render):
+this.regions.main.show(someChildView);
+</pre>
+		
+
+		
+		
+
+		<h2 id="validation">Validation</h2>
+		<p>
+			In addition to the <code>getErrors</code> method that is added to the view,
+			the validation module triggers an "error" event on the model whenever validation fails.
+			It also provides a few basic validators and a way to add custom validations. 
+		</p>
+		<p>
+			See the documentation in the JavaScript file for details.
+		</p>
+		
+		
+		<h2 id="modelerrors">ModelErrors</h2>
+		<p>
+			ModelErrors is a simple JavaScript object that can be used to collect client errors.
+			This can be useful if requiring a more complex or custom validation on the client.
+		</p>
+		<pre class="prettyprint">
+save: function () {
+	var errors = new ModelErrors();
+	if (this.model.get("someProperty") === "badValue") {
+		errors.add("someProperty", "someProperty cannot be badValue");
+	}
+	if (errors.hasErrors) {
+		this.displayErrors(errors.toJSON());
+	}
+}
+</pre>
+		
+		<h2 id="modelbinder">ModelBinder</h2>
+		<p>
+			Binds an element to a model.
+		</p>
+		<pre class="prettyprint">
+&lt;div id="someElement">
+	&lt;span data-bind="someProperty" data-bind-class="somePropertiesClassName">&lt;/span>
+&lt;/div>
+</pre>
+		<pre class="prettyprint">
+var model = new Backbone.Model({
+	someProperty: "someValue",
+	somePropertiesClassName: "disabled"
+});
+
+var mb = new ModelBinder(model, $("#someElement"));
+// when properties on the model change, they will update on the element.
+mb.unbind(); // removes the model binder event bindings.
+</pre>
+		<p>
+			The ModelBinder allows for binding using the data-bind, name, or id attributes as well as certain element attributes such as <code>data-bind-class</code>.
+			The current supported element attributes are: id, disabled, checked, class, href, text, src.
+			This can be extended as needed.
+			Different types of elements can be extended as well for custom binding needs.
+		</p>
+		<p>
+			See the documentation in the JavaScript file for details.
+		</p>
+		
+
+
+		<h2 id="menu">Menu</h2>
+		<code>Menu(el, options); // => menu</code>
+		<p>
+			Wraps an element in a menu with a few options for configuration.
+		</p>
+		<h3>Options</h3>
+		<ul>
+			<li>transition - "none", "fade", "slide"</li>
+		</ul>
+		<p>
+			The markup for the template can be changed if needed. Just override <code>Menu.template</code>.
+			The default template is:
+		</p>
+		<pre class="prettyprint">
+&lt;div class="menu">
+	&lt;div class="menu-content">&lt;!--menu element is placed here-->&lt;/div>
+&lt;/div>
+</pre>
+
+		
+
+
+		<h2 id="dialog">Dialog</h2>
+		<code>Dialog(el, options); // => dialog</code>
+		<p>
+			Wraps an element in a dialog with a few options for configuration.
+		</p>
+		<h3>Options</h3>
+		<ul>
+			<li>title - the dialog title.</li>
+			<li>transition - "none", "fade", "slide".</li>
+			<li>modal - the default is true.</li>
+			<li>draggable - the default is true (if jquery.ui.draggable exists).</li>
+			<li>position - jquery.ui.position options (the default is above window center).</li>
+			<li>editorFor - An element that is being edited by the dialog (sets modal to true, draggable to false, and handles the positioning).</li>
+			<li>removeEl - removes the element when the dialog is closed. The default is true. If false, the original element will be placed back into it's parent on close.</li>
+			<li>appendTo - An optional element to append to (other than the body).</li>
+		</ul>
+		<h3>Dialog Close Attribute</h3>
+		<p>
+			Any element with a <code>data-rel="back"</code> or <code>data-rel="close"</code> attribute will close the dialog when clicked.
+		</p>
+		<p>
+			The markup for the template can be changed if needed. Just override <code>Dialog.template</code>.
+			The default template is:
+		</p>
+		<pre class="prettyprint">
+&lt;div class="dialog-wrapper">
+	&lt;div class="dialog">
+		&lt;div class="dialog-header">
+			&lt;h1>&lt;/h1>
+			&lt;span data-rel="back" title="close" class="dialog-close">&times;&lt;/span>
+		&lt;/div>
+		&lt;div class="dialog-content">&lt;!--dialog element is placed here-->&lt;/div>
+	&lt;/div>
+&lt;/div>
+</pre>
