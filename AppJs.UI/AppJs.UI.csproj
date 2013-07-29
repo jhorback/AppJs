@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AppJs</RootNamespace>
-    <AssemblyName>AppJs</AssemblyName>
+    <RootNamespace>AppJs.UI</RootNamespace>
+    <AssemblyName>AppJs.UI</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
@@ -149,8 +149,6 @@
     <Content Include="Scripts\appui\browser.js" />
     <Content Include="Scripts\appui\globalCache.js" />
     <Content Include="Scripts\appui\JSPM.js" />
-    <Content Include="Scripts\appui\tests\browser.test.js" />
-    <Content Include="Scripts\appui\tests\JSPM.test.js" />
     <Content Include="Scripts\appui\appui.js">
       <Compile>True</Compile>
       <Minify>True</Minify>
@@ -162,8 +160,17 @@
     <Content Include="Scripts\appui\Selectable.js" />
     <Content Include="Scripts\appjs\Readme.md" />
     <Content Include="Scripts\appui\Readme.md" />
-    <Content Include="Scripts\appjs\tests\app.test.js" />
-    <Content Include="Scripts\appjs\tests\context.test.js" />
+    <Content Include="Scripts\bbext\binders\errorBinder.js" />
+    <Content Include="Scripts\bbext\binders\modelBinder.js" />
+    <Content Include="Scripts\bbext\factories.js" />
+    <Content Include="Scripts\bbext\ModelErrors.js" />
+    <Content Include="Scripts\bbext\modelExt\backupModelExt.js" />
+    <Content Include="Scripts\bbext\modelExt\getSetModelExt.js" />
+    <Content Include="Scripts\bbext\modelExt\validationModelExt.js" />
+    <Content Include="Scripts\bbext\viewExt\closeViewExt.js" />
+    <Content Include="Scripts\bbext\viewExt\renderViewExtension.js" />
+    <Content Include="Scripts\tests\appjs\app.test.js" />
+    <Content Include="Scripts\tests\appjs\context.test.js" />
     <Content Include="Scripts\app\app.combined.js" />
     <Content Include="Scripts\app\app.min.js" />
     <Content Include="Scripts\app\appui.combined.js" />
@@ -187,21 +194,13 @@
     </Content>
     <Content Include="Scripts\backbone.js" />
     <Content Include="Scripts\backbone.min.js" />
-    <Content Include="Scripts\bbexttemp\app\factories.js" />
     <Content Include="Scripts\bbexttemp\app\keepAlive.js" />
     <Content Include="Scripts\bbexttemp\app\sessionTimeout.js" />
     <Content Include="Scripts\bbexttemp\bbext.js" />
-    <Content Include="Scripts\bbext\modelGetSetExt.js" />
-    <Content Include="Scripts\bbexttemp\model\ModelErrors.js" />
-    <Content Include="Scripts\bbexttemp\model\ValidationModelExtension.js" />
     <Content Include="Scripts\bbexttemp\temp\AjaxRequest.js" />
     <Content Include="Scripts\bbexttemp\temp\Application.js" />
     <Content Include="Scripts\bbexttemp\temp\Controller.js" />
     <Content Include="Scripts\bbexttemp\temp\Region.js" />
-    <Content Include="Scripts\bbexttemp\view\CloseViewExtension.js" />
-    <Content Include="Scripts\bbexttemp\view\FormErrorHandler.js" />
-    <Content Include="Scripts\bbexttemp\view\JstViewExtension.js" />
-    <Content Include="Scripts\bbexttemp\view\ModelBinder.js" />
     <Content Include="Scripts\bbext\appEvents.js" />
     <Content Include="Scripts\bbext\bbext.js">
       <Compile>True</Compile>
@@ -209,13 +208,14 @@
       <OutputFolder>..\app</OutputFolder>
       <IncludedFiles>Scripts\bbext\app\appEvents.js</IncludedFiles>
     </Content>
-    <Content Include="Scripts\bbext\modelBackupExt.js" />
-    <Content Include="Scripts\bbext\tests\appEvents.test.js" />
-    <Content Include="Scripts\bbext\tests\_references.js" />
+    <Content Include="Scripts\tests\bbext\appEvents.test.js" />
+    <Content Include="Scripts\tests\bbext\_references.js" />
     <Content Include="Scripts\jquery-2.0.3.js" />
     <Content Include="Scripts\jquery-2.0.3.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\qunit.js" />
+    <Content Include="Scripts\tests\appui\browser.test.js" />
+    <Content Include="Scripts\tests\appui\JSPM.test.js" />
     <Content Include="Scripts\underscore.js" />
     <Content Include="Scripts\underscore.min.js" />
     <Content Include="Scripts\_references.js" />

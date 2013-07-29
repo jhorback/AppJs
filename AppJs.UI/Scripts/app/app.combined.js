@@ -453,7 +453,7 @@ appjs.module = (function (context) {
 appjs.app = (function () {
 
 	return function (appName) {
-		return module(appName, true);
+		return appjs.module(appName, true);
 	};
 
 }());

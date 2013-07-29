@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../qunit.js" />
-/// <reference path="../context.js" />
+/// <reference path="../../appjs/context.js" />
 
 
 module("context.js");
