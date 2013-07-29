@@ -4,7 +4,7 @@
 Provides Angular like bootstrapping with Backbone like flexibility.
 
 Documentation:
-* [appjs](/appjs.ui/scripts/appjs)
-* [appjsext](/appjs.ui/scripts/appjsext)
-* [appui](appjs.ui/scripts/appui)
-* [bbext](appjs.ui/scripts/bbext)
+* [appjs](/AppJs.UI/Scripts/appjs)
+* [appjsext](/AppJs.UI/Scripts/appjsext)
+* [appui](AppJs.UI/Scripts/appui)
+* [bbext](AppJs.UI/Scripts/bbext)

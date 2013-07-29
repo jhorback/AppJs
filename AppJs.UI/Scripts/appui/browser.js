@@ -1,14 +1,14 @@
 ﻿
 
-var appjsext = appjs.module("appjsext");
+var appui = appjs.module("appui");
 
 
-appjsext.register("window", function () {
+appui.register("window", function () {
 	return window;
 });
 
 
-appjsext.service("console", ["window", function (window) {
+appui.service("console", ["window", function (window) {
 	var console, log;
 
 	console = window.console || {

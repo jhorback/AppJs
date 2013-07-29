@@ -1,5 +1,5 @@
 ﻿
-appjs.module("appjsext").service("globalCache", ["globals", function (globals) {
+appjs.module("appui").service("globalCache", ["globals", function (globals) {
 	globals.globalCache = globals.globalCache || {};
 
 	return {

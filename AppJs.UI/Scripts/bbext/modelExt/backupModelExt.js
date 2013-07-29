@@ -9,7 +9,7 @@
  *     someModel.store();
  *     someModel.restore();
  */
-appjs.module("bbext").service("backupModelExtension", function () {
+var modelBackupExt = (function () {
 
 	var extension = {
 		store: function () {
@@ -30,8 +30,8 @@ appjs.module("bbext").service("backupModelExtension", function () {
 	};
 
 	return {
-		extend: function () {
+		extend: function (instance) {
 			_.extend(instance, extension);
 		}
 	};
-});
+})();

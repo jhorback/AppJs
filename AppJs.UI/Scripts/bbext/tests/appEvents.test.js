@@ -3,7 +3,7 @@
 /// <reference path="../../underscore.js" />
 /// <reference path="../../backbone.js" />
 /// <reference path="../../app/app.combined.js" />
-/// <reference path="../../app/appjsext.combined.js" />
+/// <reference path="../../app/appui.combined.js" />
 /// <reference path="../../app/bbext.combined.js" />
 
 QUnit.module("appEvents.js");

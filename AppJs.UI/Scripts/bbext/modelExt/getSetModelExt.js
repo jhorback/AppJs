@@ -1,31 +1,7 @@
-﻿/*
- * GetSetModelExtension.js
- * 
- * Description:
- *     Adds getters and setters to models.
- *     Also adjusts the toJSON method to return calculated values.
- *     and provides a refresh method to force a change on the calculated values.
- *
- * Usage:
- *    var SomeModel = Backbone.Model.extend({
- *        initialize: function () {
- *            GetSetModelExtension.extend(this);
- *        },
- *        myProp: {
- *            get: function (currentValue) {
- *                return currentValue; // default behavior
- *            },
- *            set: function (value) {
- *                return value; // default behavior
- *            },
- *            // triggers a change on the property if any of the 'bind' properties change
- *            bind: "someProperty" // can be an array for multiple properties
- *        }  
- *    });
- */
-(function () {
-    var GetSetModelExtension,
-        gsAppExt = {
+﻿
+var modelGetSetExt = (function () {
+
+	var gsAppExt = {
 		get: function (name) {
 			var val,
 				getFn = this[name] && this[name].get,
@@ -53,7 +29,7 @@
 
 		    // set is called in model construction
 			// use this as a trigger to parse and handle bindings
-			GetSetModelExtension.setupInstance(this);
+		    modelGetSetExt.setupInstance(this);
 
 			if (_.isObject(name)) {
 			    multiProps = {};
@@ -87,15 +63,15 @@
 	};
 
 
-	GetSetModelExtension = {
-
+	return {
+		
 	    setupInstance: function (instance) {
 	        if (instance._gsinit === true) {
 	            return;
 	        }
 	        instance._bindings = {};
-	        GetSetModelExtension.parseBindings(instance);
-	        GetSetModelExtension.handleBindings(instance);
+	        modelGetSetExt.parseBindings(instance);
+	        modelGetSetExt.handleBindings(instance);
 	        instance._gsinit = true;
 	    },
 		
@@ -130,5 +106,4 @@
 		}
 	};
 
-	window.GetSetModelExtension = GetSetModelExtension;
 } ());

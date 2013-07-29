@@ -1,0 +1,138 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+	<title>Index</title>
+	<script src="~/Scripts/jquery-2.0.3.min.js"></script>
+	<style>
+		.page-aside {
+			width: 300px;
+			float: left;
+		}
+		.page-content {
+			margin-left: 300px;	
+		}
+	</style>
+</head>
+	<body>
+		<div class="page-aside">
+			<div class="menulist">
+			</div>
+		</div>
+		<div class="page-content">
+			@Html.RenderMarkdown("~/scripts/appjs/readme.md")
+			@Html.RenderMarkdown("~/scripts/appui/readme.md")
+			@Html.RenderMarkdown("~/scripts/bbext/readme.md")
+		</div>
+		<script>
+			buildTOC();
+
+			function buildTOC() {
+
+				var content = $(".page-content");
+				var headings = content.find("h1,h2,h3,h4");
+				var openList = null;
+				var onH4List = false;
+				var el = $('<div/>');
+				var nextLink = 0;
+
+				headings.each(function (index, heading) {
+
+					var tag = heading.tagName;
+					var $heading = $(heading);
+					var text = $heading.text();
+					if (text.indexOf("(") > -1) {
+						text = text.substring(0, text.indexOf("("));
+					}
+
+					if (tag === "H1") {
+						closeOpenList();
+						el.append('<h1><a href="' + getLink() + '"><span class="attn">' + text + '</span></a></h1>');
+					}
+
+					if (tag === "H2") {
+						onH4List = hasH4s(headings, $heading);
+						if (!onH4List) {
+							closeOpenList();
+							el.append('<h2><a href="' + getLink() + '">' + text + '</a></h2>');
+						}
+					}
+
+					if (tag === "H3") {
+						if (onH4List) {
+							closeOpenList();
+							el.append('<h2><a href="' + getLink() + '">' + text + '</a></h2>');
+						} else {
+							addToList();
+						}
+					}
+
+					if (tag === "H4") {
+						addToList();
+					}
+
+
+
+					function addToList() {
+						if (!openList) {
+							openList = $('<ul/>');
+						}
+						openList.append('<li><a href="' + getLink() + '">' + text + '</a></li>');
+					}
+
+					function getLink() {
+						var link = "link" + (nextLink++);
+						$heading.before('<a id="' + link + '"></a>');
+						return "#" + link;
+					}
+				});
+
+				function closeOpenList() {
+					if (openList) {
+						el.append(openList);
+						openList = null;
+					}
+				}
+
+				function hasH4s(headings, heading) {
+
+					var afterHeading = false;
+					var foundH4 = false;
+
+					$.each(headings, function (index, testHeading) {
+						var tag = testHeading.tagName;
+
+						testHeading = $(testHeading);
+						if (!afterHeading) {
+							if (testHeading[0] === heading[0]) {
+								afterHeading = true;
+							}
+						} else {
+							if (tag === "H1" || tag === "H2") {
+								return false; // break
+							}
+							if (tag === "H4") {
+								foundH4 = true;
+								return false; // break
+							}
+						}
+						return undefined;
+					});
+
+					return foundH4;
+				}
+
+				closeOpenList();
+				el = el.children(0).hide();
+				$(".page-aside .menulist").html(el).append('<hr/>');
+				content.append('<div style="height:1500px;"/>');
+				el.fadeIn();
+			}
+		</script>
+	</body>
+</html>
