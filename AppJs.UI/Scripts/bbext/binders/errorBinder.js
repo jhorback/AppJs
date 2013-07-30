@@ -21,7 +21,23 @@
  *     if (someView.isModelValid()) { // this will update the view if there are errors
  *         someModel.save();
  *     }
- */
+ *
+ * Refactor:
+	data-validation-for="attributeName"
+
+	Optionally, any surrounding .form-field tag will get an .error class added.
+
+	For general form errors an .alert-error element will get the error html.
+
+
+	errorBinder.options = {
+		propertyAttribute: "data-validation-for",
+		fieldSelector: ".form-field",
+		fieldErrorClassName: ".error",
+		generalErrorSelector: ".alert-error"
+	};
+
+ */
 (function () {
  
 	var extension = {

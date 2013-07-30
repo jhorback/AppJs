@@ -8,8 +8,9 @@
  *     backupModelExtension.extend(someModel);
  *     someModel.store();
  *     someModel.restore();
+ *              .restore(name); // restores only that property
  */
-var modelBackupExt = (function () {
+var backupModelExt = (function () {
 
 	var extension = {
 		store: function () {

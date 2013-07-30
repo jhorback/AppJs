@@ -57,16 +57,16 @@
  *         }
  *     };
  */
-(function () {
+var validationModelExt = (function () {
 
 	var onModelChange = function (model) {
-		
+
 		_.each(model.changed, function (hasChanged, propertyName) {
-				if (hasChanged) {
-					validateProperty(model, propertyName);
-				}
-			});
-		},
+			if (hasChanged) {
+				validateProperty(model, propertyName);
+			}
+		});
+	},
 
 		validateProperty = function (model, propertyName, silent) {
 			var validators,
@@ -79,7 +79,7 @@
 			}
 
 			_.each(validators, function (args, validatorKey) {
-				var validateFn = ValidationModelExtension.validators[validatorKey],
+				var validateFn = validationModelExt.validators[validatorKey],
 					errorMsg;
 
 				if (!validateFn) {
@@ -96,44 +96,44 @@
 				errors = {};
 				errors[propertyName] = errorMsgs;
 				model._fieldErrors[propertyName] = true;
-				!silent && model.trigger("error", model, errors, propertyName);			
+				!silent && model.trigger("error", model, errors, propertyName);
 			} else {
 				if (!silent && model._fieldErrors[propertyName] === true) {
 					model.trigger("error", model, errors, propertyName);
 				}
 				delete model._fieldErrors[propertyName];
 			}
-			
+
 			return errors;
 		},
 
 		valAppExt = {
-		    getErrors: function () {
-		        ValidationModelExtension.setupInstance(this);
+			getErrors: function () {
+				validationModelExt.setupInstance(this);
 
 				var model = this,
 					errors = null,
 					jsonObj = model.toJSON(),
 					validateErrors = model.validate && model.validate(true);
-				
+
 				_.each(jsonObj, function (value, name) {
 					var propErrors = validateProperty(model, name, true);
 					if (propErrors) {
-						errors = _.extend(errors || { }, propErrors);
+						errors = _.extend(errors || {}, propErrors);
 					}
 				});
-				
+
 				if (validateErrors) {
-					errors = errors || { };
+					errors = errors || {};
 					_.each(validateErrors, function (errorArray, name) {
 						errors[name] = _.union(errors[name] || [], errorArray);
 					});
 				}
 				return errors;
 			}
-		},
+		};
 
-        ValidationModelExtension = {
+        return {
 	        setupInstance: function (instance) {
 	            if (instance._valinit === true) {
 	                return;
@@ -156,11 +156,11 @@
 		    validators: {
 			    required: function (value, args) {
 				    var msg = (args && args.message) || "Required.";
-				    return ValidationModelExtension.isNullOrEmpty(value) ? msg : undefined;
+				    return this.isNullOrEmpty(value) ? msg : undefined;
 			    },
 			    email: function (value) {
 				    var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA;-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-				    return (!ValidationModelExtension.isNullOrEmpty(value) && _.isString(value) && !value.match(emailRegex)) ?
+				    return (!this.isNullOrEmpty(value) && _.isString(value) && !value.match(emailRegex)) ?
 					    "Invalid email." : undefined;
 			    },
 			    custom: function (value, validator) {
@@ -168,7 +168,5 @@
 			    }
 		    }
         };
-	
-	window.ValidationModelExtension = ValidationModelExtension;
            
 })();

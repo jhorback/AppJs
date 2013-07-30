@@ -1,5 +1,5 @@
 ﻿
-var modelGetSetExt = (function () {
+var getSetModelExt = (function () {
 
 	var gsAppExt = {
 		get: function (name) {

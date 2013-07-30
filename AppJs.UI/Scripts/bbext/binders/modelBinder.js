@@ -25,6 +25,8 @@
  *     
  * ModelBinder.config:
  *     Type and attribute processing can be configured.
+	
+		// eventFromDom, getFromDom, setToDom
  *     ModelBinder.config.types["foo"] = {
  *         event: "click",               // additional dom event(s) to listen on the element to update the model
  *         get: function (el, event, binding) { },       // a method to get the value out of the dom for the model

@@ -2,5 +2,6 @@
 var bbext = appjs.module("bbext").use("appui");
 
 
-bbext.service("modelBackupExtension", modelBackupExtension);
-bbext.service("modelGetSetExt", modelGetSetExt);
+bbext.service("backupModelExt", backupModelExt);
+bbext.service("getSetModelExt", getSetModelExt);
+bbext.service("validationModelExt", validationModelExt);
