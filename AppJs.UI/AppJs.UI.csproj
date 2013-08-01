@@ -160,6 +160,7 @@
     <Content Include="Scripts\appui\Selectable.js" />
     <Content Include="Scripts\appjs\Readme.md" />
     <Content Include="Scripts\appui\Readme.md" />
+    <Content Include="Scripts\appui\shim.js" />
     <Content Include="Scripts\bbext\binders\errorBinder.js" />
     <Content Include="Scripts\bbext\binders\modelBinder.js" />
     <Content Include="Scripts\bbext\factories.js" />
