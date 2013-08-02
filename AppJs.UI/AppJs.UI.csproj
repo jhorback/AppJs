@@ -152,7 +152,7 @@
     <Content Include="Scripts\appui\appui.js">
       <Compile>True</Compile>
       <Minify>True</Minify>
-      <IncludedFiles>Scripts\appui\Dialog.js|Scripts\appui\Menu.js|Scripts\appui\Selectable.js</IncludedFiles>
+      <IncludedFiles>Scripts\appui\Dialog.js|Scripts\appui\Menu.js|Scripts\appui\Selectable.js|Scripts\appui\browser.js|Scripts\appui\globalCache.js|Scripts\appui\JSPM.js|Scripts\appui\shim.js</IncludedFiles>
       <OutputFolder>..\app</OutputFolder>
     </Content>
     <Content Include="Scripts\appui\Dialog.js" />
@@ -207,7 +207,7 @@
       <Compile>True</Compile>
       <Minify>True</Minify>
       <OutputFolder>..\app</OutputFolder>
-      <IncludedFiles>Scripts\bbext\app\appEvents.js</IncludedFiles>
+      <IncludedFiles>Scripts\bbext\appEvents.js|Scripts\bbext\binders\errorBinder.js|Scripts\bbext\binders\modelBinder.js|Scripts\bbext\events.js|Scripts\bbext\factories.js|Scripts\bbext\ModelErrors.js|Scripts\bbext\modelExt\backupModelExt.js|Scripts\bbext\modelExt\getSetModelExt.js|Scripts\bbext\modelExt\validationModelExt.js|Scripts\bbext\viewExt\closeViewExt.js|Scripts\bbext\viewExt\renderViewExtension.js</IncludedFiles>
     </Content>
     <Content Include="Scripts\tests\bbext\appEvents.test.js" />
     <Content Include="Scripts\tests\bbext\_references.js" />
@@ -217,6 +217,7 @@
     <Content Include="Scripts\qunit.js" />
     <Content Include="Scripts\tests\appui\browser.test.js" />
     <Content Include="Scripts\tests\appui\JSPM.test.js" />
+    <Content Include="Scripts\tests\moduleRegistrar.js" />
     <Content Include="Scripts\underscore.js" />
     <Content Include="Scripts\underscore.min.js" />
     <Content Include="Scripts\_references.js" />

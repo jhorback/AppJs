@@ -1,7 +1,9 @@
 ﻿/// <reference path="../../qunit.js" />
+/// <reference path="../../jquery-2.0.3.js" />
 /// <reference path="../../underscore.js" />
-/// <reference path="../../jquery-2.0.3.min.js" />
-/// <reference path="../JSPM.js" />
+/// <reference path="../../app/app.combined.js" />
+/// <reference path="../moduleRegistrar.js" />
+/// <reference path="../../app/appui.combined.js" />
 
 
 QUnit.module("JSMP.js");

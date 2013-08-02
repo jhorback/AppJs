@@ -3,7 +3,7 @@
 /// <reference path="../../appjs/app.js" />
 
 
-QUnit.module("app.js");
+module("app.js");
 
 window.debug = true;
 
