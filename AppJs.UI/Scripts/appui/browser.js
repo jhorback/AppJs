@@ -1,6 +1,6 @@
 ﻿
 
-var appui = appjs.module("appui");
+var appui = context.module("appui");
 
 
 appui.register("window", function () {

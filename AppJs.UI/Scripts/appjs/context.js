@@ -16,7 +16,7 @@
  *         - object and constructor can be determined dynamically, function cannot.
  *
  *     get(name)
- *         - retrieves the dependency.
+ *         - creates, retrieves the dependency.
  *
  *     call(method, args, context)
  *         - a utility method for satisfying the dependencies of a method directly.

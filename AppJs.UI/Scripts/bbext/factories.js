@@ -1,4 +1,4 @@
-﻿var bbext = appjs.module("bbext");
+﻿var bbext = context.module("bbext");
 
 /*
  *  factory for Backbone objects: view, model, collection.

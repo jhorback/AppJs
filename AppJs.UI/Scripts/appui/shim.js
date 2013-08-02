@@ -1,5 +1,5 @@
 ﻿
-var appui = appjs.module("appui");
+var appui = context.module("appui");
 
 appui.construct("shim", ["shims", function (shims) {
 
@@ -12,7 +12,7 @@ appui.construct("shim", ["shims", function (shims) {
 }]);
 
 
-appui.service("shims", function () {
+appui.service("shims", ["_", function (_) {
 
 	var shims = {};
 
@@ -20,13 +20,18 @@ appui.service("shims", function () {
 		register: function(name, shim) {
 			shims[name] = shim;
 		},
+		
 		render: function(el, model) {
 			if (model && !model.toJSON) {
 				throw new Error("The model must implement toJSON.");
 			}
-			
 
+			_(shims).each(function (shim) {
+
+				shim(el, model);
+
+			});
 		}
 	};
 
-});
+}]);

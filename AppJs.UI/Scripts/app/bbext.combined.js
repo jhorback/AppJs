@@ -1,5 +1,5 @@
 
-var bbext = appjs.module("bbext").use("appui");
+var bbext = context.module("bbext").use("appui");
 
 
 bbext.service("backupModelExt", backupModelExt);

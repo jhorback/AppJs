@@ -4,7 +4,7 @@
  * Description:
  *     Creates a structure for dealing with application events.
  */
-appjs.module("bbext").construct("appEvents", ["events", function (events) {
+context.module("bbext").construct("appEvents", ["events", function (events) {
 
 	return function (construct) {
 

@@ -15,7 +15,7 @@ var counter = 0,
 
 test("Calling module returns an object with expected methods.", function () {
 
-	var m = appjs.module(getNextName());
+	var m = context.module(getNextName());
 	ok(m.register !== undefined, "register is defined");
 	ok(m.construct !== undefined, "construct is defined");
 	ok(m.use !== undefined, "use is defined");
@@ -28,7 +28,7 @@ test("Calling module returns an object with expected methods.", function () {
 
 test("Calling app returns an object with expected methods.", function () {
 
-	var m = appjs.app(getNextName());
+	var m = context.app(getNextName());
 	ok(m.register !== undefined, "register is defined");
 	ok(m.construct !== undefined, "construct is defined");
 	ok(m.use !== undefined, "use is defined");
@@ -41,7 +41,7 @@ test("Calling app returns an object with expected methods.", function () {
 test("Registered start and config method gets injected on app.start.", function () {
 	expect(2);
 
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("foo", { foo: 23 });
 	testApp.config(function (foo) {
 		equal(foo.foo, 23);
@@ -56,7 +56,7 @@ test("Registered start and config method gets injected on app.start.", function 
 test("Declaring dependencies in start and config methods using an array works", function () {
 	expect(2);
 
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("fooReal", { foo: 23 });
 	testApp.config(["fooReal", function (foo) {
 		equal(foo.foo, 23);
@@ -71,7 +71,7 @@ test("Declaring dependencies in start and config methods using an array works", 
 test("Registered start and config method can change the state of services.", function () {
 	expect(2);
 
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("foo", function () {
 		var x = 23;
 		return {
@@ -101,8 +101,8 @@ test("Using another modules services works.", function () {
 	expect(2);
 	
 	var modName = getNextName();
-	var testMod = appjs.module(modName);
-	var testApp = appjs.app(getNextName());
+	var testMod = context.module(modName);
+	var testApp = context.app(getNextName());
 	testMod.register("foo", { foo: 23 });
 	testApp.use(modName);
 
@@ -123,9 +123,9 @@ test("A module used more than once only gets bootstrapped once.", function () {
 	var counter = 0;
 	var modName = getNextName();
 	var modName2 = getNextName();
-	var testMod = appjs.module(modName);
-	var testMod2 = appjs.module(modName2);
-	var testApp = appjs.app(getNextName());
+	var testMod = context.module(modName);
+	var testMod2 = context.module(modName2);
+	var testApp = context.app(getNextName());
 	testMod2.config(function () {
 		counter++;
 	});
@@ -143,9 +143,9 @@ test("Apps sharing modules get the module in a fresh state.", function () {
 	expect(3);
 
 	var modName = getNextName();
-	var testMod = appjs.module(modName);
-	var testApp = appjs.app(getNextName());
-	var testApp2 = appjs.app(getNextName());
+	var testMod = context.module(modName);
+	var testApp = context.app(getNextName());
+	var testApp2 = context.app(getNextName());
 
 	testMod.register("foo", function () {
 		var x = 23;
@@ -181,7 +181,7 @@ test("Apps sharing modules get the module in a fresh state.", function () {
 test("An app cannot be started more than once.", function () {
 
 	var counter = 0;
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 
 	testApp.start(function () {
 		counter++;
@@ -196,7 +196,7 @@ test("An app cannot be started more than once.", function () {
 test("The context is available for injection.", function () {
 	expect(1);
 	
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.config(function (context) {
 
 		context.register("foo", { test: 23 });
@@ -213,8 +213,8 @@ test("The context is available for injection.", function () {
 test("The globals var is available for injection and can be used accrossed apps.", function () {
 	expect(1);
 
-	var testApp = appjs.app(getNextName());
-	var testApp2 = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
+	var testApp2 = context.app(getNextName());
 	
 	testApp.config(function (globals) {
 		globals.rock = 23;
@@ -232,7 +232,7 @@ test("The globals var is available for injection and can be used accrossed apps.
 test("The service construct is available and can be used to create generic services.", function () {
 	expect(2);
 	
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.service("fooFactory", function () {
 		return {
 			foo: 23
@@ -261,7 +261,7 @@ test("The service construct is available and can be used to create generic servi
 test("Dependencies can be injected into a service via an array argument.", function () {
 	expect(1);
 	
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("fooReal", { test: 23 });
 	testApp.service("fooService", ["fooReal", function (foo) {
 
@@ -285,7 +285,7 @@ test("Dependencies can be injected into a service via an array argument.", funct
 test("Dependencies can be injected into a service via the $inject property.", function () {
 	expect(1);
 
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("fooReal", { test: 23 });
 	testApp.service("fooService", function (foo) {
 
@@ -311,7 +311,7 @@ test("Dependencies can be injected into a service via the $inject property.", fu
 test("Constructs can enhance object creation.", function () {
 	expect(2);
 
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("foo", { bar: "wonderwoman" });
 	testApp.construct("conundrum", function (foo) {
 
@@ -348,8 +348,8 @@ test("Constructs can be used from other modules.", function () {
 	expect(3);
 
 	var testModName = getNextName();
-	var testMod = appjs.module(testModName);
-	var testApp = appjs.app(getNextName());
+	var testMod = context.module(testModName);
+	var testApp = context.app(getNextName());
 	
 	testMod.construct("awesome", function () {
 		return function (construct) {
@@ -382,10 +382,10 @@ test("Using modules indirectly uses the correct app context.", function () {
 	var m2Name = getNextName();
 	var appName = getNextName();
 	
-	var testApp = appjs.app(appName);
-	var m2 = appjs.module(m2Name);
+	var testApp = context.app(appName);
+	var m2 = context.module(m2Name);
 
-	var m1 = appjs.module(m1Name).use(m2Name);
+	var m1 = context.module(m1Name).use(m2Name);
 	m1.register("foo", { bar: 23 });
 	
 	testApp.use(m1Name);
@@ -401,7 +401,7 @@ test("Using modules indirectly uses the correct app context.", function () {
 
 
 test("Constructor function is not required in constructs", function () {
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.service("foo", {
 		testMethod: function () {
 			ok(true, "Constructor not required.");
@@ -417,7 +417,7 @@ test("Constructor function is not required in constructs", function () {
 
 
 test("The app call method is injected.", function () {
-	var testApp = appjs.app(getNextName());
+	var testApp = context.app(getNextName());
 	testApp.register("foo", {
 		bar: 23
 	});

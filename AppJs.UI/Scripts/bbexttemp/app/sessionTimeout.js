@@ -5,7 +5,7 @@
  *      start(logoutUrl, timeout);
  *      extend();
  */
- appjs.module("bbext").service("sessionTimeout", ["keepAlive", function (keepAlive) {
+ context.module("bbext").service("sessionTimeout", ["keepAlive", function (keepAlive) {
 
 	var timeoutId = null;
 	

@@ -684,7 +684,7 @@ Focus and keyboard support.
    });
 }(jQuery));
 */
-var appui = appjs.module("appui");
+var appui = context.module("appui").use("_", "$");
 
 
 appui.service("appurl", ["baseUrl", function (baseUrl) {
