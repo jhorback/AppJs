@@ -148,7 +148,15 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\appui\browser.js" />
     <Content Include="Scripts\appui\globalCache.js" />
-    <Content Include="Scripts\appui\JSPM.js" />
+    <Content Include="Scripts\bbext\binders\collectionBinder.js" />
+    <Content Include="Scripts\bbext\binders\eventBinder.js" />
+    <Content Include="Scripts\bbext\binders\dataBinder.js" />
+    <Content Include="Scripts\bbext\binders\templateBinder.js" />
+    <Content Include="Scripts\bbext\modelExt\model.js" />
+    <Content Include="Scripts\bbext\modelExt\validators.js" />
+    <Content Include="Scripts\bbext\viewAndModelConstruct.js" />
+    <Content Include="Scripts\bbext\viewExt\view.js" />
+    <Content Include="Scripts\temp\JSPM.js" />
     <Content Include="Scripts\appui\appui.js">
       <Compile>True</Compile>
       <Minify>True</Minify>
@@ -161,10 +169,11 @@
     <Content Include="Scripts\appjs\Readme.md" />
     <Content Include="Scripts\appui\Readme.md" />
     <Content Include="Scripts\appui\shim.js" />
+    <Content Include="Scripts\temp\JstViewExtension.js" />
     <Content Include="Scripts\bbext\binders\errorBinder.js" />
     <Content Include="Scripts\bbext\binders\modelBinder.js" />
     <Content Include="Scripts\bbext\factories.js" />
-    <Content Include="Scripts\bbext\ModelErrors.js" />
+    <Content Include="Scripts\bbext\modelErrors.js" />
     <Content Include="Scripts\bbext\modelExt\backupModelExt.js" />
     <Content Include="Scripts\bbext\modelExt\getSetModelExt.js" />
     <Content Include="Scripts\bbext\modelExt\validationModelExt.js" />
@@ -178,8 +187,8 @@
     <Content Include="Scripts\app\appui.min.js" />
     <Content Include="Scripts\app\bbext.combined.js" />
     <Content Include="Scripts\app\bbext.min.js" />
-    <Content Include="Scripts\bbexttemp\Readme.md" />
-    <Content Include="Scripts\bbexttemp\_bbext.cshtml" />
+    <Content Include="Scripts\temp\Readme.md" />
+    <Content Include="Scripts\temp\_bbext.cshtml" />
     <Content Include="Scripts\bbext\events.js" />
     <Content Include="Scripts\bbext\Readme.md" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js" />
@@ -195,13 +204,13 @@
     </Content>
     <Content Include="Scripts\backbone.js" />
     <Content Include="Scripts\backbone.min.js" />
-    <Content Include="Scripts\bbexttemp\app\keepAlive.js" />
-    <Content Include="Scripts\bbexttemp\app\sessionTimeout.js" />
-    <Content Include="Scripts\bbexttemp\bbext.js" />
-    <Content Include="Scripts\bbexttemp\temp\AjaxRequest.js" />
-    <Content Include="Scripts\bbexttemp\temp\Application.js" />
-    <Content Include="Scripts\bbexttemp\temp\Controller.js" />
-    <Content Include="Scripts\bbexttemp\temp\Region.js" />
+    <Content Include="Scripts\temp\keepAlive.js" />
+    <Content Include="Scripts\temp\sessionTimeout.js" />
+    <Content Include="Scripts\temp\bbext.js" />
+    <Content Include="Scripts\temp\AjaxRequest.js" />
+    <Content Include="Scripts\temp\Application.js" />
+    <Content Include="Scripts\temp\Controller.js" />
+    <Content Include="Scripts\temp\Region.js" />
     <Content Include="Scripts\bbext\appEvents.js" />
     <Content Include="Scripts\bbext\bbext.js">
       <Compile>True</Compile>
@@ -216,7 +225,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\qunit.js" />
     <Content Include="Scripts\tests\appui\browser.test.js" />
-    <Content Include="Scripts\tests\appui\JSPM.test.js" />
+    <Content Include="Scripts\temp\JSPM.test.js" />
     <Content Include="Scripts\tests\moduleRegistrar.js" />
     <Content Include="Scripts\underscore.js" />
     <Content Include="Scripts\underscore.min.js" />

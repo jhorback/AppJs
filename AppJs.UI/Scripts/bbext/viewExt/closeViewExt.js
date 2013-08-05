@@ -1,13 +1,13 @@
 ﻿/*globals */
 /*
 */
-(function (_) {
-
-	var extension;
-
-	extension = {
-		close: function () {
-			/// <summary>An option other than remove that does not
+var closeViewExtension = (function () {
+	"use strict";
+	
+	var extension = {
+		close: function (options) {
+			/// <summary>
+			/// An option other than remove that does not
 			/// remove the view el and calls an optional 'onClose'
 			/// method when called.
 			/// </summary>
@@ -15,14 +15,20 @@
 			this.undelegateEvents();
 			this.off();
 			this.stopListening();
+			
+			if (options && options.remove === true) {
+				this.remove();
+			}
 			return this;
 		}
 	};
 
-	window.CloseViewExtension = {
+	return {
 		extend: function (proto) {
 			_.extend(proto, extension);
 		}
 	};
 
-} (_));
+}());
+
+context && context.module("bbext").service("bbext.closeViewExtension", closeViewExtension);

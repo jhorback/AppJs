@@ -178,9 +178,9 @@ context.module = (function (context) {
 				start: []
 			};
 
-			modvars.context.registry._name = name; // testing
 			if (isApp) {
 				modvars.context.register("context", modvars.context);
+				modvars.context.register("appName", name);
 			}
 			modvars.context.register("globals", _.globals);
 

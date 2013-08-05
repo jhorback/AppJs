@@ -1,7 +1,6 @@
-﻿/*!
+﻿/*
  * ValidationModelExtension.js
- */
-/*
+ *
  * Usage:
  *     var SomeModel = Backbone.Model.extend({
  *     	  defaults: {
@@ -22,7 +21,6 @@
  *             }
  *         }
  *     });
- * 
  * 
  * Error notifications:
  *     Whenever a model property changes, its validation is run.
@@ -48,125 +46,98 @@
  *             return;
  *         }
  *      }
- *
- *
- * Adding a global validator:
- *     ValidationModelExtension.validators["exclude"] = function (value, args) {
- *         if (value === args) {
- *     	       retun "The value cannot be " + args;
- *         }
- *     };
  */
-var validationModelExt = (function () {
+var validationModelExt = (function (_, validators) {
 
-	var onModelChange = function (model) {
+	var onModelChange, validateProperty, extension;
+	
 
+	onModelChange = function (model) {
 		_.each(model.changed, function (hasChanged, propertyName) {
 			if (hasChanged) {
 				validateProperty(model, propertyName);
 			}
 		});
-	},
+	};
 
-		validateProperty = function (model, propertyName, silent) {
-			var validators,
-				errorMsgs = [],
-				errors = null;
+	validateProperty = function (model, propertyName, silent) {
+		var validatorsToUse,
+			errorMsgs = [],
+			errors = null;
 
-			validators = model[propertyName] && model[propertyName].validate;
-			if (model[propertyName] && !validators) {
-				return null;
+		validatorsToUse = model[propertyName] && model[propertyName].validate;
+		if (model[propertyName] && !validatorsToUse) {
+			return null;
+		}
+
+		_.each(validatorsToUse, function (args, validatorKey) {
+			var validateFn = validators.get(validatorKey),
+				errorMsg;
+
+			if (!validateFn) {
+				throw "Validator does not exist: " + validatorKey;
 			}
 
-			_.each(validators, function (args, validatorKey) {
-				var validateFn = validationModelExt.validators[validatorKey],
-					errorMsg;
+			errorMsg = validateFn.call(model, model.get(propertyName), args);
+			if (errorMsg) {
+				errorMsgs.push(errorMsg);
+			}
+		});
 
-				if (!validateFn) {
-					throw "Validator does not exist: " + validatorKey;
-				}
+		if (errorMsgs.length > 0) {
+			errors = {};
+			errors[propertyName] = errorMsgs;
+			model._fieldErrors[propertyName] = true;
+			!silent && model.trigger("error", model, errors, propertyName);
+		} else {
+			if (!silent && model._fieldErrors[propertyName] === true) {
+				model.trigger("error", model, errors, propertyName);
+			}
+			delete model._fieldErrors[propertyName];
+		}
 
-				errorMsg = validateFn.call(model, model.get(propertyName), args);
-				if (errorMsg) {
-					errorMsgs.push(errorMsg);
+		return errors;
+	};
+
+	extension = {
+		getErrors: function () {
+			if (!this._fieldErrors) {
+				this._fieldErrors = {};
+				this.on("change", _.bind(onModelChange, instance));
+			}
+
+			var model = this,
+				errors = null,
+				jsonObj = model.toJSON(),
+				validateErrors = model.validate && model.validate(true);
+
+			_.each(jsonObj, function (value, name) {
+				var propErrors = validateProperty(model, name, true);
+				if (propErrors) {
+					errors = _.extend(errors || {}, propErrors);
 				}
 			});
 
-			if (errorMsgs.length > 0) {
-				errors = {};
-				errors[propertyName] = errorMsgs;
-				model._fieldErrors[propertyName] = true;
-				!silent && model.trigger("error", model, errors, propertyName);
-			} else {
-				if (!silent && model._fieldErrors[propertyName] === true) {
-					model.trigger("error", model, errors, propertyName);
-				}
-				delete model._fieldErrors[propertyName];
-			}
-
-			return errors;
-		},
-
-		valAppExt = {
-			getErrors: function () {
-				validationModelExt.setupInstance(this);
-
-				var model = this,
-					errors = null,
-					jsonObj = model.toJSON(),
-					validateErrors = model.validate && model.validate(true);
-
-				_.each(jsonObj, function (value, name) {
-					var propErrors = validateProperty(model, name, true);
-					if (propErrors) {
-						errors = _.extend(errors || {}, propErrors);
-					}
+			if (validateErrors) {
+				errors = errors || {};
+				_.each(validateErrors, function (errorArray, name) {
+					errors[name] = _.union(errors[name] || [], errorArray);
 				});
-
-				if (validateErrors) {
-					errors = errors || {};
-					_.each(validateErrors, function (errorArray, name) {
-						errors[name] = _.union(errors[name] || [], errorArray);
-					});
-				}
-				return errors;
 			}
-		};
+			return errors;
+		}
+	};
 
-        return {
-	        setupInstance: function (instance) {
-	            if (instance._valinit === true) {
-	                return;
-	            }
-	            instance._fieldErrors = {};
-	            instance.on("change", _.bind(onModelChange, instance));
-	            instance._valinit = true;
-	        },
-
-	        extend: function (protoOrInstance) {
-	            if (protoOrInstance._valinit !== true) {
-	                _.extend(protoOrInstance, valAppExt);
-	            }
-		    },
-		
-		    isNullOrEmpty: function (value) {
-			    return !value || !$.trim(value);
-		    },
-		
-		    validators: {
-			    required: function (value, args) {
-				    var msg = (args && args.message) || "Required.";
-				    return this.isNullOrEmpty(value) ? msg : undefined;
-			    },
-			    email: function (value) {
-				    var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA;-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-				    return (!this.isNullOrEmpty(value) && _.isString(value) && !value.match(emailRegex)) ?
-					    "Invalid email." : undefined;
-			    },
-			    custom: function (value, validator) {
-				    return validator(value);
-			    }
-		    }
-        };
+    return {
+	    extend: function (proto) {
+			_.extend(proto, extension);
+		}
+    };
            
 })();
+
+
+context && context.module("bbext").service("bbext.validationModelExt", [
+	"_", "validators",
+	validationModelExt
+]);

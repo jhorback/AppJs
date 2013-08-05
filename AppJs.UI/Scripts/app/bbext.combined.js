@@ -551,34 +551,23 @@ context.module("bbext").construct("appEvents", ["events", function (events) {
 	ModelBinder.config = config;
 
 
-	ModelBinder.extend = function (view) {
-		/// <summary>
-		/// Provide an extension that unbinds the model binder during
-		/// the .remove/stopListening view method call.
-		/// If an element is not passed, the views $el will be used.
-		/// If a model is not passed, this.model or this.collection will be used.
-		/// </summary>
-		_.extend(view, {
-			bindModelToView: function (model, el) {
-				var binder,
-					listeners = this._listeners || (this._listeners = {});
-				
-				el = el || this.$el;
-				model = model || this.model || this.collection;
-				binder = new ModelBinder(model, el);
-				listeners[_.uniqueId("ModelBinder")] = binder;
-			},
-			
-			bindTemplate: function (template, el, model) {
-				el = el || this.$el;
-				model = model || this.model;
-				this.template(template, el)(model.toJSON());
-				this.bindModelToView(model, el);
-			}
-		});
-	};
 
-} (jQuery));
+}(jQuery));
+
+
+// jch!!! - make this a dataBinder that determines if to use a modelBinder or a collectionBinder
+context.module("bbext").shim("modelBinder", ["$", "_", function ($, _) {
+
+	return {
+		render: function (el, model) {
+			var binder,
+				listeners = this._listeners || (this._listeners = {}); // Backbone
+			
+			binder = new ModelBinder(model, el);
+			listeners[_.uniqueId("modelBinder")] = binder;
+		}
+	};
+}]);
 
 
 context.module("bbext").service("events", ["globalCache", function (globalCache) {
@@ -591,8 +580,6 @@ context.module("bbext").service("events", ["globalCache", function (globalCache)
 	
 	return events;
 }]);
-var bbext = context.module("bbext");
-
 /*
  *  factory for Backbone objects: view, model, collection.
  *      get(name, options)
@@ -600,66 +587,69 @@ var bbext = context.module("bbext");
  *          - options being the Backbone options.
  *          - all other arguments required by the view will be injected.                       
  */
-var bbFactory = ["context", function (context) {
-	return {
-		create: function (name, options) {
+(function () {
+	var bbext = context.module("bbext"),
+		bbFactory = ["context", function (context) {
+			return {
+				create: function (name, options) {
 
-			return context.instantiate(name, [options]);
-		}
-	};
-}];
+					return context.instantiate(name, [options]);
+				}
+			};
+		}];
 
-bbext.service("viewFactory", Array.prototype.slice.call(bbFactory, 0));
-bbext.service("modelFactory", Array.prototype.slice.call(bbFactory, 0));
-bbext.service("collectionFactory", Array.prototype.slice.call(bbFactory, 0));
+	bbext.service("viewFactory", Array.prototype.slice.call(bbFactory, 0));
+	bbext.service("modelFactory", Array.prototype.slice.call(bbFactory, 0));
+	bbext.service("collectionFactory", Array.prototype.slice.call(bbFactory, 0));
+}());
+
 /*
  * ModelErrors.js
  * 
  * Description:
- *     Provides a container for model errors, an easy way to add an error and retrieve all errors.
+ *     A container for model errors.
+ *     Provides normalization of errors regardless of source (e.g. client/server).  
  *
  * Usage:
- *     var errors = new ModelErrors();
+ *     var errors = modelErrors.create();
  *     if (invalid) {
  *         errors.add("someProperty", "This is an error on the property");
  *     }
  *     return errors.toJSON();
  */
-var ModelErrors = function () {
-	if (this instanceof ModelErrors === false) {
-		return new ModelErrors();
-	}
+context.module("bbext").service("modelErrors", function () {
 
-	this.hasErrors = false;
-	this.errors = { };
-	return this;
-};
+	return {
+		create: function () {
+			return {
+				hasErrors: false,
+				
+				errors: {},
 
-ModelErrors.prototype = {
-	hasErrors: false,
-	errors: {},
-	
-	add: function (property, error) {
-		/// <summary>Can call with a property name and error string or just the error string for general errors.</summary>
-		var propErrors;
-		
-		this.hasErrors = true;
-		
-		if (arguments.length === 1) {
-			error = arguments[0];
-			property = "";
+				// Can call with a property name and error string or just the error string for general errors.
+				add: function (property, error) {
+					var propErrors;
+
+					this.hasErrors = true;
+
+					if (arguments.length === 1) {
+						error = arguments[0];
+						property = "";
+					}
+
+					propErrors = this.errors[property] || [];
+					propErrors.push(error);
+					this.errors[property] = propErrors;
+				},
+
+				toJSON: function () {
+					/// <summary>Returns the errors object if there are errors, otherwise returns undefined.</summary>
+					return this.hasErrors ? this.errors : undefined;
+				}
+			};
 		}
-
-		propErrors = this.errors[property] || [];
-		propErrors.push(error);
-		this.errors[property] = propErrors;
-	},
-	
-	toJSON: function () {
-		/// <summary>Returns the errors object if there are errors, otherwise returns undefined.</summary>
-		return this.hasErrors ? this.errors : undefined;
-	}
-};
+	};
+});
 /*
  * BackupModelExtension.js
  * 
@@ -698,6 +688,9 @@ var backupModelExt = (function () {
 		}
 	};
 })();
+
+
+context && context.module("bbext").service("bbext.backupModelExt", backupModelExt);
 
 var getSetModelExt = (function () {
 
@@ -808,10 +801,11 @@ var getSetModelExt = (function () {
 
 } ());
 
-/*!
- * ValidationModelExtension.js
- */
+
+context && context.module("bbext").service("bbext.getSetModelExt", getSetModelExt);
 /*
+ * ValidationModelExtension.js
+ *
  * Usage:
  *     var SomeModel = Backbone.Model.extend({
  *     	  defaults: {
@@ -832,7 +826,6 @@ var getSetModelExt = (function () {
  *             }
  *         }
  *     });
- * 
  * 
  * Error notifications:
  *     Whenever a model property changes, its validation is run.
@@ -858,138 +851,111 @@ var getSetModelExt = (function () {
  *             return;
  *         }
  *      }
- *
- *
- * Adding a global validator:
- *     ValidationModelExtension.validators["exclude"] = function (value, args) {
- *         if (value === args) {
- *     	       retun "The value cannot be " + args;
- *         }
- *     };
  */
-var validationModelExt = (function () {
+var validationModelExt = (function (_, validators) {
 
-	var onModelChange = function (model) {
+	var onModelChange, validateProperty, extension;
+	
 
+	onModelChange = function (model) {
 		_.each(model.changed, function (hasChanged, propertyName) {
 			if (hasChanged) {
 				validateProperty(model, propertyName);
 			}
 		});
-	},
+	};
 
-		validateProperty = function (model, propertyName, silent) {
-			var validators,
-				errorMsgs = [],
-				errors = null;
+	validateProperty = function (model, propertyName, silent) {
+		var validatorsToUse,
+			errorMsgs = [],
+			errors = null;
 
-			validators = model[propertyName] && model[propertyName].validate;
-			if (model[propertyName] && !validators) {
-				return null;
+		validatorsToUse = model[propertyName] && model[propertyName].validate;
+		if (model[propertyName] && !validatorsToUse) {
+			return null;
+		}
+
+		_.each(validatorsToUse, function (args, validatorKey) {
+			var validateFn = validators.get(validatorKey),
+				errorMsg;
+
+			if (!validateFn) {
+				throw "Validator does not exist: " + validatorKey;
 			}
 
-			_.each(validators, function (args, validatorKey) {
-				var validateFn = validationModelExt.validators[validatorKey],
-					errorMsg;
+			errorMsg = validateFn.call(model, model.get(propertyName), args);
+			if (errorMsg) {
+				errorMsgs.push(errorMsg);
+			}
+		});
 
-				if (!validateFn) {
-					throw "Validator does not exist: " + validatorKey;
-				}
+		if (errorMsgs.length > 0) {
+			errors = {};
+			errors[propertyName] = errorMsgs;
+			model._fieldErrors[propertyName] = true;
+			!silent && model.trigger("error", model, errors, propertyName);
+		} else {
+			if (!silent && model._fieldErrors[propertyName] === true) {
+				model.trigger("error", model, errors, propertyName);
+			}
+			delete model._fieldErrors[propertyName];
+		}
 
-				errorMsg = validateFn.call(model, model.get(propertyName), args);
-				if (errorMsg) {
-					errorMsgs.push(errorMsg);
+		return errors;
+	};
+
+	extension = {
+		getErrors: function () {
+			if (!this._fieldErrors) {
+				this._fieldErrors = {};
+				this.on("change", _.bind(onModelChange, instance));
+			}
+
+			var model = this,
+				errors = null,
+				jsonObj = model.toJSON(),
+				validateErrors = model.validate && model.validate(true);
+
+			_.each(jsonObj, function (value, name) {
+				var propErrors = validateProperty(model, name, true);
+				if (propErrors) {
+					errors = _.extend(errors || {}, propErrors);
 				}
 			});
 
-			if (errorMsgs.length > 0) {
-				errors = {};
-				errors[propertyName] = errorMsgs;
-				model._fieldErrors[propertyName] = true;
-				!silent && model.trigger("error", model, errors, propertyName);
-			} else {
-				if (!silent && model._fieldErrors[propertyName] === true) {
-					model.trigger("error", model, errors, propertyName);
-				}
-				delete model._fieldErrors[propertyName];
-			}
-
-			return errors;
-		},
-
-		valAppExt = {
-			getErrors: function () {
-				validationModelExt.setupInstance(this);
-
-				var model = this,
-					errors = null,
-					jsonObj = model.toJSON(),
-					validateErrors = model.validate && model.validate(true);
-
-				_.each(jsonObj, function (value, name) {
-					var propErrors = validateProperty(model, name, true);
-					if (propErrors) {
-						errors = _.extend(errors || {}, propErrors);
-					}
+			if (validateErrors) {
+				errors = errors || {};
+				_.each(validateErrors, function (errorArray, name) {
+					errors[name] = _.union(errors[name] || [], errorArray);
 				});
-
-				if (validateErrors) {
-					errors = errors || {};
-					_.each(validateErrors, function (errorArray, name) {
-						errors[name] = _.union(errors[name] || [], errorArray);
-					});
-				}
-				return errors;
 			}
-		};
+			return errors;
+		}
+	};
 
-        return {
-	        setupInstance: function (instance) {
-	            if (instance._valinit === true) {
-	                return;
-	            }
-	            instance._fieldErrors = {};
-	            instance.on("change", _.bind(onModelChange, instance));
-	            instance._valinit = true;
-	        },
-
-	        extend: function (protoOrInstance) {
-	            if (protoOrInstance._valinit !== true) {
-	                _.extend(protoOrInstance, valAppExt);
-	            }
-		    },
-		
-		    isNullOrEmpty: function (value) {
-			    return !value || !$.trim(value);
-		    },
-		
-		    validators: {
-			    required: function (value, args) {
-				    var msg = (args && args.message) || "Required.";
-				    return this.isNullOrEmpty(value) ? msg : undefined;
-			    },
-			    email: function (value) {
-				    var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA;-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-				    return (!this.isNullOrEmpty(value) && _.isString(value) && !value.match(emailRegex)) ?
-					    "Invalid email." : undefined;
-			    },
-			    custom: function (value, validator) {
-				    return validator(value);
-			    }
-		    }
-        };
+    return {
+	    extend: function (proto) {
+			_.extend(proto, extension);
+		}
+    };
            
 })();
+
+
+context && context.module("bbext").service("bbext.validationModelExt", [
+	"_", "validators",
+	validationModelExt
+]);
 /*globals */
 /*
 */
-(function (_) {
-
-	var extension;
-
-	extension = {
-		close: function () {
-			/// <summary>An option other than remove that does not
+var closeViewExtension = (function () {
+	"use strict";
+	
+	var extension = {
+		close: function (options) {
+			/// <summary>
+			/// An option other than remove that does not
 			/// remove the view el and calls an optional 'onClose'
 			/// method when called.
 			/// </summary>
@@ -997,127 +963,85 @@ var validationModelExt = (function () {
 			this.undelegateEvents();
 			this.off();
 			this.stopListening();
+			
+			if (options && options.remove === true) {
+				this.remove();
+			}
 			return this;
 		}
 	};
 
-	window.CloseViewExtension = {
+	return {
 		extend: function (proto) {
 			_.extend(proto, extension);
 		}
 	};
 
-} (_));
-/*globals */
+}());
+
+context && context.module("bbext").service("bbext.closeViewExtension", closeViewExtension);
 /*
-* Desription:
-*     Adds JST and template methods to any object.
-*     Templates can live in script tags with type="text/template".
-*         The id of the script tag is to be used as the template parameter in the JST and template methods.
-*     Templates can also be found on any element with a data-template attribute set to the template name.
-*         This second way requires a css selector to hide all  
-*
-* Requires:
-*     jQuery, Underscore
-*
-* Usage:
-*     JstViewExtension.extend(this); // 'this' is typically the view
-*
-* Methods:
-*     JST(template, model) - returns a promise containing the html fragment result and model from the template rendering.
-*                            the model can have deferred properties which will be resolved before the callback.
-*     template(template, el) - returns the compiled template function.
-*                              el is an optional argument that will add the result of the template to the dom node. 
-*                              this.$el will be used if exists and el is not passed.
-*/
-(function ($, _) {
-
-	var extension;
-
+ * renderViewExtension
+ * 
+ * Description
+ *     Implements the render method for Backbone views.
+ *     Calls an optional onRender method after rendering.
+ */
+var renderViewExtension = (function (_, shims) {
+	"use strict";
+	
+	var extension,
+		getTemplate,
+		templates = {};
+	
 	// set the template parsing to {{value}} instead of <%= value %>
 	_.templateSettings = { interpolate: /\{\{(.+?)\}\}/g };
 
+	getTemplate = function (templateId) {
+		var templateFn = templates[templateId],
+			html;
+		
+		if (!templateFn) {
+			html = $("#" + templateId).html();
+			if (!html) {
+				throw "Template '" + templateId + "' not found";
+			}
+			templateFn = _.template(html);
+			templates[templateId] = templateFn;
+		}
+
+	};
 
 	extension = {
-		renderTemplate: function (template) {
-			return this.template(template, this.$el);
-		},
+		render: function () {
+			var model = this.model || this.collection,
+				templateFn = getTemplate(this.templateId);
 
-		template: function (template, el) {
-			/// <summary>Executes the template and returns the result.</summary>
-			var templateHtml,
-				templateFn = JstViewExtension.templates[template];
+			// static rendering of template with compiled function			
+			this.$el.html(templateFn(model.toJSON()));
 
-			if (!templateFn) {
-				templateHtml = $("#" + template).html();
-				if (!templateHtml) {
-					templateHtml = $("[data-template='" + template + "']").html();
-					if (!templateHtml) {
-						throw "Template '" + template + "' not found";
-					}
-				}
-				templateFn = _.template(templateHtml);
-				JstViewExtension.templates[template] = templateFn;
-			}
+			// allow the shims to 
+			shims.render(this.$el, model);
+			
+			this.onRender && this.onRender();
+			
+			return this;
+		}
+	};
+	
 
-			if (el) {
-				return function (model) {
-					return $(el).html(templateFn(model));
-				};
-			}
-			return templateFn;
-		},
-
-		// jch* - remove this when converting the old view extension
-		JST: function (template, model) {
-			/// <summary>Returns a promise containing the html fragment result from the template rendering.</summary>
-			var dfd = $.Deferred(),
-				dfds = [],
-				templateFn;
-
-			templateFn = extension.template(template);
-			model = _.clone(model) || {};
-
-			_.each(model, function (dfd, name) {
-				var curryDfd;
-				if (dfd && dfd.then) {
-					curryDfd = $.Deferred();
-					dfd.then(function (data) {
-						curryDfd.resolve({
-							name: name,
-							result: data
-						});
-					});
-					dfds.push(curryDfd);
-				}
-			});
-
-			$.when.apply($, dfds).then(function () {
-				var results = _.toArray(arguments);
-
-				_.each(results, function (result) {
-					model[result.name] = result.result;
-				});
-
-				dfd.resolve(templateFn(model), model);
-			});
-
-			return dfd.promise();
+	return  {
+		extend: function (proto) {
+			_.extend(proto, extension);
 		}
 	};
 
-	window.JstViewExtension = {
-		templates: {},
-		extend: function (instance) {
-			_.extend(instance, extension);
-		}
-	};
-
-}(jQuery, _));
-
-var bbext = context.module("bbext").use("appui");
+});
 
 
-bbext.service("backupModelExt", backupModelExt);
-bbext.service("getSetModelExt", getSetModelExt);
-bbext.service("validationModelExt", validationModelExt);
+context && context.module("bbext").service("bbext.renderViewExtension", [
+	"_", "shims",
+	renderViewExtension
+]);
+
+// bbext.js - used to combine and minify all bbext scripts

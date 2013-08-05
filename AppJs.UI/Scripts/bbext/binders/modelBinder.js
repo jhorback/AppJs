@@ -344,31 +344,20 @@
 	ModelBinder.config = config;
 
 
-	ModelBinder.extend = function (view) {
-		/// <summary>
-		/// Provide an extension that unbinds the model binder during
-		/// the .remove/stopListening view method call.
-		/// If an element is not passed, the views $el will be used.
-		/// If a model is not passed, this.model or this.collection will be used.
-		/// </summary>
-		_.extend(view, {
-			bindModelToView: function (model, el) {
-				var binder,
-					listeners = this._listeners || (this._listeners = {});
-				
-				el = el || this.$el;
-				model = model || this.model || this.collection;
-				binder = new ModelBinder(model, el);
-				listeners[_.uniqueId("ModelBinder")] = binder;
-			},
-			
-			bindTemplate: function (template, el, model) {
-				el = el || this.$el;
-				model = model || this.model;
-				this.template(template, el)(model.toJSON());
-				this.bindModelToView(model, el);
-			}
-		});
-	};
 
-} (jQuery));
+}(jQuery));
+
+
+// jch!!! - make this a dataBinder that determines if to use a modelBinder or a collectionBinder
+context.module("bbext").shim("modelBinder", ["$", "_", function ($, _) {
+
+	return {
+		render: function (el, model) {
+			var binder,
+				listeners = this._listeners || (this._listeners = {}); // Backbone
+			
+			binder = new ModelBinder(model, el);
+			listeners[_.uniqueId("modelBinder")] = binder;
+		}
+	};
+}]);

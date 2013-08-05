@@ -6,6 +6,9 @@ appui.construct("shim", ["shims", function (shims) {
 	return function (construct, name) {
 
 		shims.register(name, construct);
+		if (!construct.render) {
+			throw new Error("A shim must implement render");
+		}
 		return construct;
 	};
 
@@ -28,7 +31,7 @@ appui.service("shims", ["_", function (_) {
 
 			_(shims).each(function (shim) {
 
-				shim(el, model);
+				shim.render(el, model);
 
 			});
 		}

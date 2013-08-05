@@ -5,22 +5,22 @@
 /// <reference path="../moduleRegistrar.js" />
 /// <reference path="../../app/appui.combined.js" />
 
-
 QUnit.module("browser.js", {
 	setup: function () {
+		
+		window.debug = true;
+		
+		
+
 		context.module("jQuery").register("$", jQuery);
 		context.module("Underscore").register("_", _);
 	}
 });
 
-window.debug = true;
-
-
-var counter = 0,
-    unique = function () {
-    	return "test" + counter++;
-    };
-
+window.counter = 0;
+window.unique = function () {
+	return "test" + counter++;
+};
 
 test("That console has all expected methods.", function () {
 	expect(3);

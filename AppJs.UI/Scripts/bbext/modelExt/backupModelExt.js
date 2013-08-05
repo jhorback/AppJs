@@ -36,3 +36,6 @@ var backupModelExt = (function () {
 		}
 	};
 })();
+
+
+context && context.module("bbext").service("bbext.backupModelExt", backupModelExt);

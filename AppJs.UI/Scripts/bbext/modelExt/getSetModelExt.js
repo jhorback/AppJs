@@ -107,3 +107,6 @@ var getSetModelExt = (function () {
 	};
 
 } ());
+
+
+context && context.module("bbext").service("bbext.getSetModelExt", getSetModelExt);

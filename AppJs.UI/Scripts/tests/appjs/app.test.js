@@ -426,3 +426,35 @@ test("The app call method is injected.", function () {
 		equal(foo.bar, 23);
 	});
 });
+
+
+test("appName has been injected for an app.", function () {
+	var name = getNextName(),
+		testApp = context.app(name);
+	
+	testApp.start(function (appName) {
+		equal(name, appName);
+	});
+
+	testApp.start();
+});
+
+
+test("appName has been injected for a module.", function () {
+	expect(2);
+	
+	var name = getNextName(),
+		modName = getNextName(),
+		testMod = context.module(modName),
+		testApp = context.app(name).use(modName);
+
+	testMod.config(function (appName) {
+		equal(name, appName);
+	});
+
+	testApp.start(function (appName) {
+		equal(name, appName);
+	});
+
+	testApp.start();
+});
