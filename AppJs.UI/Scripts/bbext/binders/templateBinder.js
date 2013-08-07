@@ -2,14 +2,16 @@
 module("bbext").register("templateRenderer", function () {
 	return {
 		render: function (templateEl, model) {
-			// cache on templateEl.data("templatefor");nnki8i;ol.
-			// render the template in the els parent.
+			// cache on templateEl.data("templatefor");
+			// find the view/controller create with model
+			// wait for initialize promise!! which can change the model
+			// view.render -> render the template in the els parent.
 		}
 	};
 });
 
 
-module("bbext").shim("templateModelBinder",
+module("bbext").shim("templateBinder",
 	["$", "templateRenderer",
 function ($, templateRenderer) {
 
@@ -20,7 +22,7 @@ function ($, templateRenderer) {
 				rootModelHasGet = model.get ? true : false;
 			
 			el = $(el);
-			el.find("[data-templatefor]").each(function (i, templateEl) {
+			el.find("> [data-templatefor]").each(function (i, templateEl) {
 				var templateModel = model,
 					bindTo;
 
@@ -40,13 +42,12 @@ function ($, templateRenderer) {
 
 
 
-
-
 module("bbext").service("app", [
 	"$", "appName", "templateRenderer",
 function ($, appName, templateRenderer) {
 
 	return {
+		name: appName,
 		render: function (model) {
 			var templateEl = $("[data-templatefor='" + appName + "']");
 			templateRenderer.render(templateEl, model);

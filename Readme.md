@@ -1,7 +1,7 @@
 ﻿
 # appjs
 
-Provides Angular like bootstrapping with Backbone like flexibility.
+Provides Angular like bootstrapping with Ember like flexibility with a Backbone.
 
 Documentation:
 * [appjs](/AppJs.UI/Scripts/appjs)
