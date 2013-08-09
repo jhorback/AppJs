@@ -148,6 +148,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\appui\browser.js" />
     <Content Include="Scripts\appui\globalCache.js" />
+    <Content Include="Scripts\bbext\app.js" />
     <Content Include="Scripts\bbext\binders\collectionBinder.js" />
     <Content Include="Scripts\bbext\binders\eventBinder.js" />
     <Content Include="Scripts\bbext\binders\dataBinder.js" />

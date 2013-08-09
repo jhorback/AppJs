@@ -22,7 +22,7 @@ function ($, templateRenderer) {
 				rootModelHasGet = model.get ? true : false;
 			
 			el = $(el);
-			el.find("> [data-templatefor]").each(function (i, templateEl) {
+			el.find("[data-templatefor]").each(function (i, templateEl) {
 				var templateModel = model,
 					bindTo;
 
@@ -42,28 +42,10 @@ function ($, templateRenderer) {
 
 
 
-module("bbext").service("app", [
-	"$", "appName", "templateRenderer",
-function ($, appName, templateRenderer) {
-
-	return {
-		name: appName,
-		render: function (model) {
-			var templateEl = $("[data-templatefor='" + appName + "']");
-			templateRenderer.render(templateEl, model);
-		}
-	};
-
-}]);
-
-
-
+/*
 app("userAdmin").start(function (app) {
 	app.render(model);
 });
-
-
-
 
 
 app("userAdmin").view("userAdmin", function () {
@@ -77,3 +59,4 @@ app("userAdmin").view("userAdmin", function () {
 	}
 });
 
+*/
