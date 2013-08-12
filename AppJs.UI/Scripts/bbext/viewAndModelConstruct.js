@@ -13,6 +13,8 @@ context.module("bbext").service("bbext.viewAndModelConstruct", function () {
 			return function (construct, name) {
 				var protoProps = construct.prototype;
 
+				protoProps.name = name;
+
 				protoProps.constructor = construct;
 				if (protoProps.constructor) {
 					protoProps._ctor = protoProps.constructor;

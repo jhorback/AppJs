@@ -7,7 +7,7 @@ function ($, appName, templateRenderer) {
 		name: appName,
 		render: function (model) {
 			var templateEl = $("[data-templatefor='" + appName + "']");
-			templateRenderer.render(templateEl, model);
+			templateRenderer.render(appName, templateEl, model);
 		}
 	};
 

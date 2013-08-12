@@ -22,7 +22,7 @@
 	}]);
 
 
-	bbext.construct("model",
+	bbext.construct("view",
 		["Backbone", "bbext.View", "bbext.viewAndModelConstruct",
 	function (Backbone, View, viewAndModelConstruct) {
 

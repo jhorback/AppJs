@@ -2,43 +2,35 @@
  * renderViewExtension
  * 
  * Description
- *     Implements the render method for Backbone views.
+ *     Implements the render method for Backbone views.     
+ *     Uses the name property of the view to find the template
+ *         The name property is put there by the view construct
+ *     Calls shim.render
+ *          The view is placed as data on the $el: $el.data("view").
+ *          So the shim has access to the view.
  *     Calls an optional onRender method after rendering.
+
+	
+	determine model or collection
+	--> WHICH piece of code does the iterating - 
+
+
  */
-var renderViewExtension = (function (_, shims) {
+var renderViewExtension = (function (_, shims, templateCache) {
 	"use strict";
 	
-	var extension,
-		getTemplate,
-		templates = {};
-	
-	// set the template parsing to {{value}} instead of <%= value %>
-	_.templateSettings = { interpolate: /\{\{(.+?)\}\}/g };
-
-	getTemplate = function (templateId) {
-		var templateFn = templates[templateId],
-			html;
-		
-		if (!templateFn) {
-			html = $("#" + templateId).html();
-			if (!html) {
-				throw "Template '" + templateId + "' not found";
-			}
-			templateFn = _.template(html);
-			templates[templateId] = templateFn;
-		}
-
-	};
-
-	extension = {
+	var extension = {
 		render: function () {
 			var model = this.model || this.collection,
-				templateFn = getTemplate(this.templateId);
+				templateFn = templateCache.getTemplateFor(this.name);
 
-			// static rendering of template with compiled function			
-			this.$el.html(templateFn(model.toJSON()));
+			// set the element since the template contains the root
+			this.setElement(templateFn(model.toJSON()));
+			
+			// add the view to the $el.data
+			this.$el.data("view", this);
 
-			// allow the shims to 
+			// allow the shims to render
 			shims.render(this.$el, model);
 			
 			this.onRender && this.onRender();
@@ -46,7 +38,6 @@ var renderViewExtension = (function (_, shims) {
 			return this;
 		}
 	};
-	
 
 	return  {
 		extend: function (proto) {
@@ -58,6 +49,6 @@ var renderViewExtension = (function (_, shims) {
 
 
 context && context.module("bbext").service("bbext.renderViewExtension", [
-	"_", "shims",
+	"_", "shims", "templateCache",
 	renderViewExtension
 ]);
