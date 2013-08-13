@@ -109,15 +109,25 @@ function ($, templateRenderer) {
 		// looks for data-templatefor
 		render: function (el, model) {
 			var jsonModel = model.toJSON(),
-				rootModelHasGet = model.get ? true : false;
+				rootModelHasGet = model.get ? true : false,
+				isElATemplate;
 			
 			el = $(el);
+			isElATemplate = el.attr("data-templatefor") ? true : false;
 			el.find("[data-templatefor]").each(function (i, templateEl) {
 				var templateFor,
 					bindTo,
-					templateModel = null;
+					templateModel = null,
+					closestTemplate;
 
 				templateEl = $(templateEl);
+				
+				// restrict rendering to the first level of templates
+				closestTemplate = templateEl.parent.closest("[data-template-for]");
+				if ((isElATemplate === false && closestTemplate.length !== 0) || closestTemplate[0] !== el[0]) {
+					return;
+				}
+
 				templateFor = templateEl.attr("data-templatefor");
 				bindTo = templateEl.data("bind");
 				
